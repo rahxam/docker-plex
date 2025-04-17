@@ -1,0 +1,35 @@
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    networks:
+      - traefik
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.stack.network=traefik"  
+
+        - "traefik.http.routers.plex.rule=Host(`plex.hartig.es`)"
+        - "traefik.http.routers.plex.entrypoints=https"
+        - "traefik.http.routers.plex.tls=true"
+
+        - "traefik.http.services.plex.loadbalancer.server.port=32400"
+
+        - "traefik.constraint=proxy-public"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM=claim-FLsGQVM3JXLxnnGzcwsX #get from https://account.plex.tv/en/claim
+    volumes:
+      - /home/docker/mnt/fast/media/library:/config
+      - /home/docker/mnt/slow/media/tv:/tv
+      - /home/docker/mnt/slow/media/movies:/movies
+      - /home/docker/mnt/slow/media/music:/music
+
+
+networks:
+  traefik:
+    external: true
